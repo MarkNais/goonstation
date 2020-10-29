@@ -4,13 +4,14 @@
 #define DELETE_CHECK 2
 
 //admin levels
-#define LEVEL_HOST 6
-#define LEVEL_CODER 5
-#define LEVEL_ADMIN 4
-#define LEVEL_PA 3
-#define LEVEL_IA 2
-#define LEVEL_SA 1
-#define LEVEL_MOD 0
+#define LEVEL_HOST 8
+#define LEVEL_CODER 7
+#define LEVEL_ADMIN 6
+#define LEVEL_PA 5
+#define LEVEL_IA 4
+#define LEVEL_SA 3
+#define LEVEL_MOD 2
+#define LEVEL_EVENT 1
 #define LEVEL_BABBY -1
 
 // verb categories
@@ -22,6 +23,7 @@
 #define ADMIN_CAT_ATOM "Atom"
 #define ADMIN_CAT_SERVER_TOGGLES "Server Toggles"
 #define ADMIN_CAT_FUN "Fun"
+#define ADMIN_CAT_EVENT "Event Runner"
 #define ADMIN_CAT_DEBUG "Debug"
 #define ADMIN_CAT_UNUSED "You Should Never See This" // note that the verb might still be used as a proc, don't delete those
 #define ADMIN_CAT_NONE null // not in the tabs
@@ -33,6 +35,7 @@ var/global/list/toggleable_admin_verb_categories = list(
 	ADMIN_CAT_SERVER,
 	// not ADMIN_CAT_SELF because it contains Change Admin Preferences
 	ADMIN_CAT_ATOM,
+	ADMIN_CAT_EVENT,
 	ADMIN_CAT_SERVER_TOGGLES,
 	ADMIN_CAT_FUN,
 	ADMIN_CAT_DEBUG
