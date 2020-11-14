@@ -1666,6 +1666,7 @@ var/datum/preMapLoad/preMapLoad = new
 #include "code\WorkInProgress\dialogue\dialogue_NTcommander.dm"
 #include "code\WorkInProgress\dialogue\dialogue_NTrep.dm"
 #include "code\WorkInProgress\dialogue\dialogue_polaris.dm"
+#include "code\WorkInProgress\dialogue\dialogue_SyndiAgent.dm"
 #include "code\WorkInProgress\dialogue\dialogueSystem.dm"
 #include "code\WorkInProgress\dialogue\dialogueTraders.dm"
 #include "code\WorkInProgress\fluid_pipes\fluid_pipe.dm"

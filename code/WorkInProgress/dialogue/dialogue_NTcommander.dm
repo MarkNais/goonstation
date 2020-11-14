@@ -35,7 +35,7 @@
 
 		getNodeText(var/client/C)
 			var/rep = C.reputations.get_reputation_level("nt")
-			var/rank = C.reputations.get_Nanotrasen_rank_string("nt")
+			var/rank = C.reputations.get__rank_string("nt")
 			switch(rep)
 				if(0)
 					return "Hello [C.mob.name]. What business do you have with me?"
@@ -231,7 +231,7 @@
 			else return 0
 
 		getNodeText(var/client/C)
-			var/rank = C.reputations.get_Nanotrasen_rank_string("nt")
+			var/rank = C.reputations.get_rank_string("nt")
 			return "Excellent work, [rank] [C.mob.name]! You'll do Nanotrasen proud. Now hand it over and I will make sure you will be rewarded accordingly."
 
 
@@ -245,7 +245,7 @@
 			else return 0
 
 		getNodeText(var/client/C)
-			var/rank = C.reputations.get_Nanotrasen_rank_string("nt")
+			var/rank = C.reputations.get_rank_string("nt")
 			return "Excellent work, [rank] [C.mob.name]! You'll do Nanotrasen proud. Now hand it over and I will make sure you will be rewarded accordingly."
 
 	nt_itemtake
@@ -255,8 +255,8 @@
 		links = list()
 
 		getNodeText(var/client/C)
-			var/rank = C.reputations.get_Nanotrasen_rank_string("nt")
-			return "� will make sure that Nanotrasen will remember your name, [rank] [C.mob.name]."
+			var/rank = C.reputations.get_rank_string("nt")
+			return "I will make sure that Nanotrasen will remember your name, [rank] [C.mob.name]."
 
 		canShow(var/client/C)
 			if(istype(C.mob.equipped(), /obj/item/factionrep/ntboard)) return 1
@@ -276,8 +276,8 @@
 		links = list()
 
 		getNodeText(var/client/C)
-			var/rank = C.reputations.get_Nanotrasen_rank_string("nt")
-			return "� will make sure that Nanotrasen will remember your name, [rank] [C.mob.name]."
+			var/rank = C.reputations.get_rank_string("nt")
+			return "I will make sure that Nanotrasen will remember your name, [rank] [C.mob.name]."
 
 		canShow(var/client/C)
 			if(istype(C.mob.equipped(), /obj/item/factionrep/ntboarddebug)) return 1
@@ -293,14 +293,14 @@
 
 /obj/item/factionrep/ntboard
 	name = "syndicate circuit board"
-	desc = "Rather complex circuit board, ripped straight from syndicate drone's internal mechanicsm.Maybe someone would be interested in this?"
+	desc = "Rather complex circuit board, ripped straight from syndicate drone's internal mechanicsm. Maybe someone would be interested in this?"
 	icon = 'icons/misc/factionrewards.dmi'
 	icon_state = "droneboard2"
 	event_handler_flags = IMMUNE_MANTA_PUSH
 
 /obj/item/factionrep/ntboarddebug
 	name = "syndicate circuit board"
-	desc = "Rather complex circuit board, ripped straight from syndicate drone's internal mechanicsm.Maybe someone would be interested in this?"
+	desc = "Rather complex circuit board, ripped straight from syndicate drone's internal mechanicsm. Maybe someone would be interested in this?"
 	icon = 'icons/misc/factionrewards.dmi'
 	icon_state = "droneboard2"
 	event_handler_flags = IMMUNE_MANTA_PUSH

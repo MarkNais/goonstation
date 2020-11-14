@@ -105,10 +105,10 @@
 			return F.get_reputation(master, include_modifiers)
 		else throw ("Invalid faction id [id]")
 
-	proc/get_Nanotrasen_rank_string(var/id = "", var/include_modifiers = 1)
+	proc/get_rank_string(var/id = "", var/include_modifiers = 1)
 		if(factions[id])
 			var/datum/faction/F = factions[id]
-			return F.get_Nanotrasen_rank_string(master, include_modifiers)
+			return F.get_rank_string(master, include_modifiers)
 		else throw ("Invalid faction id [id]")
 
 /datum/faction
@@ -177,7 +177,7 @@
 		client.cloud_put("rep_[lowertext(id)]", (absolute ? amt : (curr + amt)))
 		return 0
 
-	proc/get_Nanotrasen_rank_string(var/client = null, var/include_modifiers = 1)
+	proc/get_rank_string(var/client = null, var/include_modifiers = 1)
 		var/rank = get_reputation_level(client, include_modifiers = 1)
 		switch(rank)
 			if(1) return "Seaman"
@@ -188,3 +188,34 @@
 			if(6 to INFINITY) return "Chief Officer"
 			else
 				return
+
+/datum/faction/syndicate
+    get_rank_string(var/client = null, var/include_modifiers = 1)
+        var/rank = get_reputation_level(client, include_modifiers)
+        switch(rank)
+            if(1) return "Smelly"
+            if(2) return "Nerd"
+            if(3) return "Dork"
+            if(4) return "Chump"
+            if(5) return "Schmuck"
+            if(6 to INFINITY) return "Dorko Mundo"
+            if(-1) return "Chumbo"
+            if(-2) return "Yucky"
+            if(-3) return "Dim"
+            if(-4) return "Fart Smeller"
+            if(-5) return "Bongo Brain"
+            if(-INFINITY to -6) return "Meanie"
+            else
+                return
+/datum/faction/nanotrasen
+    get_rank_string(var/client = null, var/include_modifiers = 1)
+        var/rank = get_reputation_level(client, include_modifiers)
+        switch(rank)
+            if(1) return "Seaman"
+            if(2) return "Cadet"
+            if(3) return "Lieutenant"
+            if(4) return "Lieutenant First Class"
+            if(5) return "Officer"
+            if(6 to INFINITY) return "Chief Officer"
+            else
+                return
