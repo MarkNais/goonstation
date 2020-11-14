@@ -207,15 +207,3 @@
             if(-INFINITY to -6) return "Meanie"
             else
                 return
-/datum/faction/nanotrasen
-    get_rank_string(var/client = null, var/include_modifiers = 1)
-        var/rank = get_reputation_level(client, include_modifiers)
-        switch(rank)
-            if(1) return "Seaman"
-            if(2) return "Cadet"
-            if(3) return "Lieutenant"
-            if(4) return "Lieutenant First Class"
-            if(5) return "Officer"
-            if(6 to INFINITY) return "Chief Officer"
-            else
-                return

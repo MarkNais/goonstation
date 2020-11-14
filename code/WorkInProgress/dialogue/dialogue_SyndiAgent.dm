@@ -33,7 +33,7 @@
 
 		getNodeText(var/client/C)
 			var/rep = C.reputations.get_reputation_level("syndi")
-			var/rank = C.reputations.get_Syndicate_rank_string("syndi")
+			var/rank = C.reputations.get_rank_string("syndi")
 			switch(rep)
 				if(0)
 					return "Hello [C.mob.name]. What business do you have with me?"
@@ -77,7 +77,7 @@
 			else return 0
 
 		getNodeText(var/client/C)
-			var/rank = C.reputations.get_Syndicate_rank_string("syndi")
+			var/rank = C.reputations.get_rank_string("syndi")
 			return "Thanks. Butt no thanks [rank]"
 
 	test_e
@@ -87,7 +87,7 @@
 		links = list()
 
 		getNodeText(var/client/C)
-			var/rank = C.reputations.get_Syndicate_rank_string("syndi")
+			var/rank = C.reputations.get_rank_string("syndi")
 			return "You suck [rank]."
 
 		canShow(var/client/C)

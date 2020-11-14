@@ -35,7 +35,7 @@
 
 		getNodeText(var/client/C)
 			var/rep = C.reputations.get_reputation_level("nt")
-			var/rank = C.reputations.get__rank_string("nt")
+			var/rank = C.reputations.get_rank_string("nt")
 			switch(rep)
 				if(0)
 					return "Hello [C.mob.name]. What business do you have with me?"
