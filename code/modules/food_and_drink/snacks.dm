@@ -136,7 +136,7 @@
 			I = new /icon('icons/obj/foodNdrink/food_meals.dmi',"pizza_topping_1")
 			I.Blend(topping_color, ICON_ADD)
 			src.overlays += I
-		else if (num == 0 & sliced == 1) // Bad, I know, sorry!
+		else if (num == 0 && sliced == 1) // Bad, I know, sorry!
 			I = new /icon('icons/obj/foodNdrink/food_meals.dmi',"pizza_topping_s1")
 			I.Blend(topping_color, ICON_ADD)
 			src.overlays += I
@@ -1123,6 +1123,8 @@
 			src.heal_amt *= 2
 			..()
 			src.heal_amt /= 2
+		else
+			..()
 
 	frosted
 		name = "frosted donut"
@@ -1551,10 +1553,17 @@
 			user.visible_message("[user] adds a bun to [src].","You add a bun to [src].")
 			src.update_icon()
 
-		else if (istype(W,/obj/item/rods))
+		else if (istype(W,/obj/item/rods) || istype(W,/obj/item/stick))
 			if(!src.bun)
 				boutput(user, "<span class='alert'>You need to bread it first!</span>")
 				return
+
+			// Check for broken sticks
+			if(istype(W,/obj/item/stick))
+				var/obj/item/stick/S = W
+				if(S.broken)
+					boutput(user, __red("You can't use a broken stick!"))
+					return
 
 			boutput(user, "<span class='notice'>You create a corndog...</span>")
 			var/obj/item/reagent_containers/food/snacks/corndog/newdog = null
@@ -1569,10 +1578,15 @@
 					newdog = new /obj/item/reagent_containers/food/snacks/corndog/spooky(get_turf(src))
 				else
 					newdog = new /obj/item/reagent_containers/food/snacks/corndog(get_turf(src))
-			W:amount--
+
+			// Consume a rod or stick
+			if(istype(W,/obj/item/rods)) W.change_stack_amount(-1)
+			if(istype(W,/obj/item/stick)) W.amount--
+
+			// If no rods or sticks left, delete item
 			if(!W:amount) qdel(W)
 
-			if(newdog && newdog.reagents && src.reagents)
+			if(newdog?.reagents && src.reagents)
 				src.reagents.trans_to(newdog, 100)
 
 			if(src.herb)

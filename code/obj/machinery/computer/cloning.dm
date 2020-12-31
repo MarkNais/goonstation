@@ -110,7 +110,7 @@
 
 	else if (isscrewingtool(W) && ((src.status & BROKEN) || !src.pod1 || !src.scanner || src.allow_dead_scanning || src.allow_mind_erasure || src.pod1.BE))
 		playsound(src.loc, "sound/items/Screwdriver.ogg", 50, 1)
-		if(do_after(user, 20))
+		if(do_after(user, 2 SECONDS))
 			boutput(user, "<span class='notice'>The broken glass falls out.</span>")
 			var/obj/computerframe/A = new /obj/computerframe( src.loc )
 			if(src.material) A.setMaterial(src.material)
@@ -203,6 +203,9 @@
 	if (istype(subject.mutantrace, /datum/mutantrace/kudzu))
 		show_message("Error: Incompatible cellular structure.", "danger")
 		return
+	if (istype(subject.mutantrace, /datum/mutantrace/zombie))
+		show_message("Error: Incompatible cellular structure.", "danger")
+		return
 	if (subject.mob_flags & IS_BONER)
 		show_message("Error: No tissue mass present.<br>Total ossification of subject detected.", "danger")
 		return
@@ -212,7 +215,7 @@
 		if ((subject.ghost && subject.ghost.mind && subject.ghost.mind.key))
 			subjMind = subject.ghost.mind
 		else if (subject.last_client)
-			var/mob/M = find_ghost_by_key(subject.last_client.ckey)
+			var/mob/M = find_ghost_by_key(subject.last_client.key)
 			if (isVRghost(M) || inafterlifebar(M) || isghostcritter(M))
 				subjMind = M.mind
 			else
@@ -311,7 +314,7 @@
 		var/datum/data/record/Ba = FindBankAccountByName(C.fields["name"])
 		var/account_credit = 0
 
-		if (Ba && Ba.fields["current_money"])
+		if (Ba?.fields["current_money"])
 			account_credit = Ba.fields["current_money"]
 
 		if ((src.held_credit + account_credit) >= wagesystem.clone_cost)
@@ -415,7 +418,9 @@ proc/find_ghost_by_key(var/find_key)
 		connected?.scanner = null
 		connected = null
 		pods = null
-		occupant = null
+		if(occupant)
+			occupant.set_loc(get_turf(src.loc))
+			occupant = null
 		..()
 
 	MouseDrop_T(mob/living/target, mob/user)
@@ -461,7 +466,7 @@ proc/find_ghost_by_key(var/find_key)
 		return
 
 	proc/move_mob_inside(var/mob/M)
-		if (!can_operate(M)) return
+		if (!can_operate(M) || !ishuman(M)) return
 
 		M.pulling = null
 		M.set_loc(src)
@@ -664,7 +669,8 @@ proc/find_ghost_by_key(var/find_key)
 				active_process = PROCESS_IDLE
 
 /obj/machinery/computer/cloning/ui_act(action, params)
-	if(..())
+	. = ..()
+	if (.)
 		return
 	switch(action)
 		if("delete")
@@ -765,32 +771,40 @@ proc/find_ghost_by_key(var/find_key)
 
 
 /obj/machinery/computer/cloning/ui_data(mob/user)
-	var/list/data = list()
-	var/list/recordsTemp = list()
-	data["allowedToDelete"] = src.allowed(user)
-	data["scannerGone"] = isnull(src.scanner)
-	data["occupantScanned"] = FALSE
-	data["podGone"] = isnull(src.pod1)
+
+	. = list(
+		"allowedToDelete" = src.allowed(user),
+		"scannerGone" = isnull(src.scanner),
+		"occupantScanned" = FALSE,
+		"podGone" = isnull(src.pod1),
+
+		"message" = src.currentStatusMessage,
+		"disk" = !isnull(src.diskette),
+
+		"allowMindErasure" = src.allow_mind_erasure,
+		"clonesForCash" = wagesystem.clones_for_cash,
+		"balance" = src.held_credit,
+	)
 	if(!isnull(src.pod1))
-		data["mindWipe"] = pod1.mindwipe
-		data["meatLevels"] = pod1.meat_level
-		data["cloneSlave"] = pod1.cloneslave
-		data["geneticAnalysis"] = pod1.gen_analysis
-		data["completion"] = (!isnull(pod1.occupant) ? clamp(100 - ((pod1.occupant.max_health - pod1.occupant.health) - pod1.heal_level), 0, 100) : 0)
+		. += list(
+			"mindWipe" = pod1.mindwipe,
+			"meatLevels" = pod1.meat_level,
+			"cloneSlave" = pod1.cloneslave,
+			"geneticAnalysis" = pod1.gen_analysis,
+			"completion" = (!isnull(pod1.occupant) ? clamp(100 - ((pod1.occupant.max_health - pod1.occupant.health) - pod1.heal_level), 0, 100) : 0),
+		)
 	if(!isnull(src.scanner))
-		data["scannerOccupied"] = src.scanner.occupant
-		data["scannerLocked"] = src.scanner.locked
+		. += list(
+			"scannerOccupied" = src.scanner.occupant,
+			"scannerLocked" = src.scanner.locked,
+		)
 		if(!isnull(src.scanner?.occupant?.mind))
-			data["occupantScanned"] = !isnull(find_record(ckey(src.scanner.occupant.mind.key)))
-	data["message"] = src.currentStatusMessage
-	data["disk"] = !isnull(src.diskette)
+			. += list("occupantScanned" = !isnull(find_record(ckey(src.scanner.occupant.mind.key))))
+
 	if(!isnull(src.diskette))
-		data["diskReadOnly"] = src.diskette.read_only
-	data["allowMindErasure"] = src.allow_mind_erasure
-	data["clonesForCash"] = wagesystem.clones_for_cash
-	data["balance"] = src.held_credit
+		. += list("diskReadOnly" = src.diskette.read_only)
 
-
+	var/list/recordsTemp = list()
 	for (var/r in records)
 		var/saved = FALSE
 		var/obj/item/implant/health/H = locate(r["fields"]["imp"])
@@ -811,9 +825,7 @@ proc/find_ghost_by_key(var/find_key)
 			saved = saved
 		)))
 
-	data["cloneRecords"] = recordsTemp
-
-	return data
+	. += list("cloneRecords" = recordsTemp)
 
 /obj/machinery/computer/cloning/ui_state(mob/user)
 	return tgui_default_state

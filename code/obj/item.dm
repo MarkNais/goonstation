@@ -396,13 +396,14 @@
 
 		if (src.reagents && src.reagents.total_volume)
 			src.reagents.reaction(M, INGEST)
-			SPAWN_DBG (5) // Necessary.
+			SPAWN_DBG(0.5 SECONDS) // Necessary.
 				src.reagents.trans_to(M, src.reagents.total_volume/src.amount)
 
 		playsound(M.loc,"sound/items/eatfood.ogg", rand(10, 50), 1)
-		SPAWN_DBG (10)
+		eat_twitch(M)
+		SPAWN_DBG(1 SECOND)
 			if (!src || !M || !user)
-				return 0
+				return
 			M.visible_message("<span class='alert'>[M] finishes eating [src].</span>",\
 			"<span class='alert'>You finish eating [src].</span>")
 			SEND_SIGNAL(M, COMSIG_ITEM_CONSUMED, user, src)
@@ -411,9 +412,6 @@
 		return 1
 
 	else
-		if(M.mob_flags & IS_RELIQUARY)
-			boutput(user, "<span class='alert'>They don't come equipped with a digestive system, so there is no point in trying to feed them.</span>")
-			return 0
 		user.tri_message("<span class='alert'><b>[user]</b> tries to feed [M] [src]!</span>",\
 		user, "<span class='alert'>You try to feed [M] [src]!</span>",\
 		M, "<span class='alert'><b>[user]</b> tries to feed you [src]!</span>")
@@ -434,14 +432,14 @@
 
 		if (src.reagents && src.reagents.total_volume)
 			src.reagents.reaction(M, INGEST)
-			SPAWN_DBG (5) // Necessary.
+			SPAWN_DBG(0.5 SECONDS) // Necessary.
 				src.reagents.trans_to(M, src.reagents.total_volume)
 
 		playsound(M.loc, "sound/items/eatfood.ogg", rand(10, 50), 1)
-		SPAWN_DBG (10)
+		eat_twitch(M)
+		SPAWN_DBG(1 SECOND)
 			if (!src || !M || !user)
-				return 0
-
+				return
 			M.visible_message("<span class='alert'>[M] finishes eating [src].</span>",\
 			"<span class='alert'>You finish eating [src].</span>")
 			SEND_SIGNAL(M, COMSIG_ITEM_CONSUMED, user, src)
@@ -476,12 +474,7 @@
 		else
 			src.overlays += image('icons/effects/fire.dmi', "1old")
 		processing_items.Add(src)
-#if ASS_JAM
-		if(src.reagents)
-			SPAWN_DBG(3 SECONDS)
-				if(src.reagents)
-					smoke_reaction(src.reagents, 0, get_turf(src), do_sfx=FALSE) // bring back infinicheese 2020
-#endif
+
 		/*if (src.reagents && src.reagents.reagent_list && src.reagents.reagent_list.len)
 
 			//boutput(world, "<span class='alert'><b>[src] is releasing chemsmoke!</b></span>")
@@ -786,10 +779,11 @@
 		if (prob(7))
 			elecflash(src)
 		if (prob(7))
-			var/datum/effects/system/bad_smoke_spread/smoke = new /datum/effects/system/bad_smoke_spread()
-			smoke.set_up(1, 0, src.loc)
-			smoke.attach(src)
-			smoke.start()
+			if(!(src.item_function_flags & SMOKELESS))// maybe a better way to make this if no?
+				var/datum/effects/system/bad_smoke_spread/smoke = new /datum/effects/system/bad_smoke_spread()
+				smoke.set_up(1, 0, src.loc)
+				smoke.attach(src)
+				smoke.start()
 		if (prob(7))
 			fireflash(src, 0)
 
@@ -842,8 +836,7 @@
 
 	SEND_SIGNAL(src, COMSIG_ITEM_ATTACK_SELF, user)
 
-	if(chokehold)
-		chokehold.attack_self(user)
+	chokehold?.attack_self(user)
 
 	return
 
@@ -912,8 +905,6 @@
 
 /obj/item/ex_act(severity)
 	switch(severity)
-		if (1.0)
-			return
 		if (2.0)
 			if (src.material)
 				src.material.triggerTemp(src ,7500)
@@ -1015,7 +1006,7 @@
 		if (4.0) t = "bulky"
 		if (5.0 to INFINITY) t = "huge"
 		else
-	if (usr && usr.bioHolder && usr.bioHolder.HasEffect("clumsy") && prob(50)) t = "funny-looking"
+	if (usr?.bioHolder?.HasEffect("clumsy") && prob(50)) t = "funny-looking"
 	return "It is \an [t] item."
 
 /obj/item/attack_hand(mob/user as mob)
@@ -1122,19 +1113,8 @@
 			return
 
 	var/obj/item/affecting = M.get_affecting(user, def_zone)
-	var/hit_area
-	var/d_zone
-	if (istype(affecting, /obj/item/organ))
-		var/obj/item/organ/O = affecting
-		hit_area = parse_zone(O.organ_name)
-		d_zone = O.organ_name
-	else if (istype(affecting, /obj/item/parts))
-		var/obj/item/parts/P = affecting
-		hit_area = parse_zone(P.slot)
-		d_zone = P.slot
-	else
-		hit_area = parse_zone(affecting)
-		d_zone = affecting
+	var/hit_area = parse_zone(affecting)
+	var/d_zone = affecting
 
 	if (!M.melee_attack_test(user, src, d_zone))
 		logTheThing("combat", user, M, "attacks [constructTarget(M,"combat")] with [src] ([type], object name: [initial(name)]) but the attack is blocked!")
@@ -1339,10 +1319,10 @@
 	if (attacher.zone_sel.selecting == "l_arm")
 		new_arm = new /obj/item/parts/human_parts/arm/left/item(attachee)
 		attachee.limbs.l_arm = new_arm
-	else
+	else if (attacher.zone_sel.selecting == "r_arm")
 		new_arm = new /obj/item/parts/human_parts/arm/right/item(attachee)
 		attachee.limbs.r_arm = new_arm
-	if (!new_arm) return //who knows
+	if (!new_arm) return //who knows - or they aren't targetting an arm!
 
 	new_arm.holder = attachee
 	attacher.remove_item(src)
@@ -1469,7 +1449,7 @@
 
 /obj/item/proc/dropped(mob/user)
 	if (user)
-		src.dir = user.dir
+		src.set_dir(user.dir)
 		#ifdef COMSIG_MOB_DROPPED
 		SEND_SIGNAL(user, COMSIG_MOB_DROPPED, src)
 		#endif
@@ -1498,8 +1478,7 @@
 	#ifdef COMSIG_MOB_PICKUP
 	SEND_SIGNAL(user, COMSIG_MOB_PICKUP, src)
 	#endif
-	if(src.material)
-		src.material.triggerPickup(user, src)
+	src.material?.triggerPickup(user, src)
 	set_mob(user)
 	show_buttons()
 	if (src.inventory_counter)

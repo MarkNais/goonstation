@@ -271,6 +271,9 @@
 	return
 
 /obj/machinery/emp_act()
+	if(src.flags & EMP_SHORT) return
+	src.flags |= EMP_SHORT
+
 	src.use_power(7500)
 
 	var/obj/overlay/pulse2 = new/obj/overlay ( src.loc )
@@ -278,9 +281,10 @@
 	pulse2.icon_state = "empdisable"
 	pulse2.name = "emp sparks"
 	pulse2.anchored = 1
-	pulse2.dir = pick(cardinal)
+	pulse2.set_dir(pick(cardinal))
 
 	SPAWN_DBG(1 SECOND)
+		src.flags &= ~EMP_SHORT
 		qdel(pulse2)
 	return
 
@@ -368,6 +372,6 @@
 	var/area/A1 = get_area(src)
 	. = ..()
 	var/area/A2 = get_area(src)
-	if(A1 != A2)
+	if(A1 && A2 && A1 != A2)
 		A1.machines -= src
 		A2.machines += src
